@@ -5,7 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GearRatios {
 
@@ -14,9 +16,13 @@ public class GearRatios {
     public int lineLength = 0;
     public Character[][] matrix = null;
 
+    int gearRatios = 0;
+
+    public Map<String, List<Integer>> symbolAndValues = new HashMap<>();
+
     public static void main(String[] args) {
 
-        List<String> allLines = new ArrayList<String>();
+        List<String> allLines = new ArrayList<>();
         try {
             allLines = Files.readAllLines(Paths.get("input.txt"));
         } catch (IOException e) {
@@ -45,7 +51,16 @@ public class GearRatios {
                 }
             }
         }
-        System.out.println(ratios.total);
+        System.out.println("Part one solution: " + ratios.total);
+
+        for (String key : ratios.symbolAndValues.keySet()){
+            if(ratios.symbolAndValues.get(key).size() == 2){
+                ratios.gearRatios = ratios.gearRatios + ratios.symbolAndValues.get(key).get(0) * ratios.symbolAndValues.get(key).get(1);
+            }
+        }
+
+        System.out.println("Part two solution: " + ratios.gearRatios);
+
 
     }//end of main
 
@@ -55,23 +70,30 @@ public class GearRatios {
             value = value + Character.getNumericValue(matrix[line][j]) * (int) Math.pow(10, power);
             power++;
         }
-        if (hasSymbol(line, j+1, column)) total = total + value;
+        if (hasSymbol(line, j+1, column, value)) total = total + value;
         return j;
     }
 
-    private boolean hasSymbol(int line, int startColumn, int endColumn) {
+    private boolean hasSymbol(int line, int startColumn, int endColumn, int value) {
         int upperLine = line == 0 ? 0 : line - 1;
         int lowerLine = line == numLines - 1? numLines - 1 : line + 1;
         int leftColumn = startColumn == 0? 0 : startColumn - 1;
         int rightColumn = endColumn == lineLength - 1? lineLength - 1 : endColumn + 1;
+        boolean hasSymbols = false;
         for (int i = upperLine ; i <= lowerLine; i++) {
             for (int j = leftColumn; j <= rightColumn; j++) {
                 if (!Character.isDigit(matrix[i][j]) && matrix[i][j]!= '.') {
-                    return true;
+                    hasSymbols = true;
+                    String key = i + "," + j;
+                    if (symbolAndValues.containsKey(key)){
+                        symbolAndValues.get(key).add(value);
+                    }else{
+                        symbolAndValues.put(key, new ArrayList<>(){{add(value);}});
+                    }
                 }
             }
         }
-        return false;
+        return hasSymbols;
     }
 
 
