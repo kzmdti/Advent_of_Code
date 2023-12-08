@@ -35,6 +35,7 @@ public class CamelCard {
 
         private int getHandScore(String hand){
             ArrayList<Character> al = new ArrayList<>();
+            boolean containJoker = hand.contains("J");
             for (int i = 0; i < hand.length(); i++) {
                 al.add(hand.charAt(i));
             }
@@ -44,14 +45,29 @@ public class CamelCard {
                         Collections.frequency(al,al.get(i)));
             }
             int score = 0;
-            for(int i : hm.values()){
-                score = score + (int) Math.pow(10,i);
+            if (!containJoker){
+                for(int i : hm.values()){
+                    score = score + (int) Math.pow(10,i);
+                }
+            }else{
+                int jokers = hm.get('J');
+                ArrayList<Integer> numbers = new ArrayList<>();
+                for (Character c : hm.keySet()){
+                    if (c != 'J') numbers.add(hm.get(c));
+                }
+                if (numbers.isEmpty()) return (int) Math.pow(10, 5) - 1;
+                Collections.sort(numbers, Collections.reverseOrder());
+                int tmp = numbers.get(0);
+                numbers.set(0, tmp + jokers);
+                for (int i : numbers){
+                    score = score + (int) Math.pow(10, i);
+                }
             }
             return score;
         }
 
         private int compareSingleCard(String hand, String hand1) {
-            String cardOrder = "23456789TJQKA";
+            String cardOrder = "J23456789TQKA";
             int result = 0;
             for (int i = 0; i < hand.length();){
                 if (hand.charAt(i) == hand1.charAt(i)) i++;
@@ -80,10 +96,11 @@ public class CamelCard {
         int partOne = 0;
         int i = 1;
         for (CamelCard.Hand hand : sortedMap.keySet()){
+            System.out.println(hand);
             partOne = partOne + sortedMap.get(hand) * i;
             i++;
         }
-        System.out.println("Part one solution: " + partOne);
+        System.out.println("Part two solution: " + partOne);
     }
 
 }
